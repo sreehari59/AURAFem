@@ -1,1 +1,2 @@
 # AURAFem
+> GenAi Hackathon
