@@ -21,10 +21,42 @@ keys = "sk-proj-kg3o9DSLp-lnGwbDoE1QEspfeSpj2xp7X5JqWH66VtRiI5QCtEVisCOImJDVjAaU
 openai_key = keys
 
 client = OpenAI(api_key=keys)
-st.session_state["openai_model"] = "gpt-3.5-turbo"
+st.session_state["openai_model"] = "gpt-4o-mini"
 
 def crew_agent(openai_key):
     llm=LLM(model="gpt-4o-mini", api_key=openai_key)
+
+    symptoms_agent = Agent(
+                role="Find the symptoms",
+                goal="Should ask for the relevant symptoms for given the disease",
+                allow_delegation=False,
+                verbose=True,
+                llm=llm,
+                backstory=(
+                    """
+                    The symptoms agent is worlds best doctor and has excellent knowledge about the SYMPTOMS associated with
+                    diseases like endometriosis,
+                    PCOS, cervical cancer, endometrial cancer and ovarian cancer. 
+                    """
+                ),
+                tools=[],
+                )
+    
+    symptoms_task = Task(
+        description=(
+            """
+            We have a patient SHE is suffering from a disease. Ask her more into about the SYMPTOMS based on the
+            patient disease:
+            {patient_disease}
+            """
+        ),
+        expected_output="""
+            Start being a positive and telling stay positive. 
+            Detail the disease mentioned by the patient and also ask about more about the symptoms
+            """,
+        tools=[],
+        agent=symptoms_agent,
+    )
 
     treatment_agent = Agent(
                 role="Provide a possible treatment",
@@ -57,10 +89,22 @@ def crew_agent(openai_key):
         agent=treatment_agent,
     )
 
+    manager = Agent(
+        role="Master Agent",
+        goal="Oversee the patients response and manage the specialized agents to deliver a positive and helping hand for the patient.",
+        backstory="""Experienced, meticulous MEDICAL manager coordinating the efforts of agents across different domains like symptom identifying, treatment suggestion.
+        The MEDICAL manager should always start asking SYMPTOMS before moving into treatment""",
+        allow_delegation=True,
+        cache=True,
+        verbose=True,
+        # llm=llm,
+        )   
+
     crew = Crew(
-                agents=[treatment_agent],
-                tasks=[treatment_task],
-                process=Process.sequential,
+                agents=[symptoms_agent, treatment_agent],
+                tasks=[symptoms_task, treatment_task],
+                manager_agent=manager,
+                process=Process.hierarchical
                 )
     
     return crew
@@ -86,7 +130,7 @@ if patient_disease:= st.chat_input(placeholder="Ask a question"):
 
     st.session_state.messages.append({"role": "user", "content": patient_disease})
     with st.spinner("Thinking..."):
-        if "cancer|CANCER" in patient_disease:
+        if "cancer" in patient_disease:
             print("SUCESS")
             response = generate_response(patient_disease)
         else:

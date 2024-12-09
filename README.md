@@ -1,5 +1,5 @@
 # AURAFem
-> GenAi Hackathon
+> GenAI Hackathon
 
 # Reference Links
 1. https://foundationforwomenscancer.org/research/clinical-trial-basics/
