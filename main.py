@@ -7,6 +7,7 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
+
 st.markdown(
     """
     <style>
@@ -19,8 +20,8 @@ st.markdown(
     .stButton button {
         background-color: #4CAF50; /* Button color */
         color: white;
-        padding: 80px 60px; /* Size of the button */
-        font-size: 20px; /* Font size */
+        padding: 90px 70px; /* Size of the button */
+        font-size: 50px; /* Font size */
         border-radius: 10px; /* Rounded corners */
         border: none; /* Remove border */
         cursor: pointer;
@@ -50,5 +51,5 @@ with col2:
 with col3:
     for i in range(12):
         st.write("\n")
-    if st.button("Insurance Agent"):
+    if st.button("Insurance"):
         st.switch_page(page="pages/insurance.py")
